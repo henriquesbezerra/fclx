@@ -22,3 +22,6 @@ ver: ./Dinâmica-Projeto.png
 SQLC -> como orm
 golang-migrate -> para gerar as migrations
 migrate create -ext=mysql -dir=sql/migrations -seq init 
+
+
+docker exec -it  mysql mysql -uroot -p
