@@ -72,7 +72,7 @@ func (c *Chat) Validate() error {
 		return errors.New("user id is empty")
 	}
 
-	if c.Status == "active" && c.Status != "ended" {
+	if c.Status != "active" && c.Status != "ended" {
 		return errors.New("invalid status")
 	}
 

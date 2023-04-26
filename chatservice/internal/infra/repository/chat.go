@@ -23,6 +23,11 @@ func NewChatRepositoryMySQL(dbt *sql.DB) *ChatRepositoryMySQL {
 }
 
 func (r *ChatRepositoryMySQL) CreateChat(ctx context.Context, chat *entity.Chat) error {
+	stop := ""
+	if len(chat.Config.Stop) > 0 {
+		stop = chat.Config.Stop[0]
+	}
+
 	err := r.Queries.CreateChat(
 		ctx,
 		db.CreateChatParams{
@@ -36,7 +41,7 @@ func (r *ChatRepositoryMySQL) CreateChat(ctx context.Context, chat *entity.Chat)
 			Temperature:      float64(chat.Config.Temperature),
 			TopP:             float64(chat.Config.TopP),
 			N:                int32(chat.Config.N),
-			Stop:             chat.Config.Stop[0],
+			Stop:             stop,
 			MaxTokens:        int32(chat.Config.MaxTokens),
 			PresencePenalty:  float64(chat.Config.PresencePenalty),
 			FrequencyPenalty: float64(chat.Config.FrequencyPenalty),
@@ -124,6 +129,10 @@ func (r *ChatRepositoryMySQL) FindChatByID(ctx context.Context, chatID string) (
 }
 
 func (r *ChatRepositoryMySQL) SaveChat(ctx context.Context, chat *entity.Chat) error {
+	stop := ""
+	if len(chat.Config.Stop) > 0 && chat.Config.Stop[0] != "" {
+		stop = chat.Config.Stop[0]
+	}
 	params := db.SaveChatParams{
 		ID:               chat.ID,
 		UserID:           chat.UserID,
@@ -134,7 +143,7 @@ func (r *ChatRepositoryMySQL) SaveChat(ctx context.Context, chat *entity.Chat) e
 		Temperature:      float64(chat.Config.Temperature),
 		TopP:             float64(chat.Config.TopP),
 		N:                int32(chat.Config.N),
-		Stop:             chat.Config.Stop[0],
+		Stop:             stop,
 		MaxTokens:        int32(chat.Config.MaxTokens),
 		PresencePenalty:  float64(chat.Config.PresencePenalty),
 		FrequencyPenalty: float64(chat.Config.FrequencyPenalty),

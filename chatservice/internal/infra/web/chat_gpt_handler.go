@@ -23,6 +23,7 @@ func NewWebChatGPTHandler(uc chatcompletion.ChatCompletionUseCase, config chatco
 }
 
 func (h *WebChatGPTHandler) Handle(w http.ResponseWriter, r *http.Request) {
+
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return

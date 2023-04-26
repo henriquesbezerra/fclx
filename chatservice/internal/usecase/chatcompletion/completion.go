@@ -6,6 +6,7 @@ import (
 
 	"github.com/henriquesbezerra/fclx/chatservice/internal/domain/entity"
 	"github.com/henriquesbezerra/fclx/chatservice/internal/domain/gateway"
+	"github.com/henriquesbezerra/fclx/chatservice/mocks"
 	openai "github.com/sashabaranov/go-openai"
 )
 
@@ -53,7 +54,7 @@ func (uc *ChatCompletionUseCase) Execute(ctx context.Context, input ChatCompleti
 		if err.Error() == "chat not found" {
 			chat, err = createNewChat(input)
 			if err != nil {
-				return nil, errors.New("error creating new chat: " + err.Error())
+				return nil, errors.New("error creating new chat 1: " + err.Error())
 			}
 			err = uc.ChatGateway.CreateChat(ctx, chat)
 			if err != nil {
@@ -81,11 +82,13 @@ func (uc *ChatCompletionUseCase) Execute(ctx context.Context, input ChatCompleti
 		})
 	}
 
-	resp, err := uc.OpenAIClient.CreateChatCompletion(
+	mock := &mocks.OpenAIClient{}
+
+	resp, err := mock.CreateChatCompletion(
 		context.Background(),
-		openai.ChatCompletionRequest{
+		mocks.OpenAIRequest{
 			Model:            chat.Config.Model.Name,
-			Messages:         messages,
+			Messages:         []mocks.AiMessage{{Message: mocks.AiContent{Content: "msg1"}}},
 			MaxTokens:        chat.Config.MaxTokens,
 			Temperature:      chat.Config.Temperature,
 			TopP:             chat.Config.TopP,
@@ -94,8 +97,23 @@ func (uc *ChatCompletionUseCase) Execute(ctx context.Context, input ChatCompleti
 			Stop:             chat.Config.Stop,
 		},
 	)
+
+	// resp, err := uc.OpenAIClient.CreateChatCompletion(
+	// 	context.Background(),
+	// 	openai.ChatCompletionRequest{
+	// 		Model:            chat.Config.Model.Name,
+	// 		Messages:         messages,
+	// 		MaxTokens:        chat.Config.MaxTokens,
+	// 		Temperature:      chat.Config.Temperature,
+	// 		TopP:             chat.Config.TopP,
+	// 		PresencePenalty:  chat.Config.PresencePenalty,
+	// 		FrequencyPenalty: chat.Config.FrequencyPenalty,
+	// 		Stop:             chat.Config.Stop,
+	// 	},
+	// )
+
 	if err != nil {
-		return nil, errors.New("error openai: " + err.Error())
+		return nil, errors.New("\nerror openai: " + err.Error())
 	}
 
 	assistant, err := entity.NewMessage("assistant", resp.Choices[0].Message.Content, chat.Config.Model)
@@ -140,7 +158,7 @@ func createNewChat(input ChatCompletionInputDTO) (*entity.Chat, error) {
 	}
 	chat, err := entity.NewChat(input.UserID, initialMessage, chatConfig)
 	if err != nil {
-		return nil, errors.New("error creating new chat: " + err.Error())
+		return nil, errors.New("\nerror creating new chat 2:  " + err.Error())
 	}
 	return chat, nil
 }

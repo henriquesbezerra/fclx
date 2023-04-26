@@ -8,6 +8,7 @@ import (
 
 	"github.com/henriquesbezerra/fclx/chatservice/internal/domain/entity"
 	"github.com/henriquesbezerra/fclx/chatservice/internal/domain/gateway"
+	"github.com/henriquesbezerra/fclx/chatservice/mocks"
 	openai "github.com/sashabaranov/go-openai"
 )
 
@@ -95,17 +96,33 @@ func (uc *ChatCompletionUseCase) Execute(ctx context.Context, input ChatCompleti
 		})
 	}
 
-	resp, err := uc.OpenAiClient.CreateChatCompletionStream(ctx,
-		openai.ChatCompletionRequest{
+	mock := &mocks.OpenAIClientStream{}
+	resp, err := mock.CreateChatCompletionStream(
+		context.Background(),
+		mocks.OpenAIRequestStream{
 			Model:            chat.Config.Model.Name,
-			Messages:         messages,
+			Messages:         []mocks.AiMessage{{Message: mocks.AiContent{Content: "msg1"}}},
 			MaxTokens:        chat.Config.MaxTokens,
+			Temperature:      chat.Config.Temperature,
 			TopP:             chat.Config.TopP,
 			PresencePenalty:  chat.Config.PresencePenalty,
 			FrequencyPenalty: chat.Config.FrequencyPenalty,
 			Stop:             chat.Config.Stop,
 			Stream:           true,
-		})
+		},
+	)
+
+	// resp, err := uc.OpenAiClient.CreateChatCompletionStream(ctx,
+	// 	openai.ChatCompletionRequest{
+	// 		Model:            chat.Config.Model.Name,
+	// 		Messages:         messages,
+	// 		MaxTokens:        chat.Config.MaxTokens,
+	// 		TopP:             chat.Config.TopP,
+	// 		PresencePenalty:  chat.Config.PresencePenalty,
+	// 		FrequencyPenalty: chat.Config.FrequencyPenalty,
+	// 		Stop:             chat.Config.Stop,
+	// 		Stream:           true,
+	// 	})
 
 	if err != nil {
 		return nil, errors.New("error creating chat completion: " + err.Error())
